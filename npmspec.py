@@ -125,14 +125,12 @@ class BoilderPlate(cmdln.Cmdln):
 
         data = self.fetch_registry(name)
 
-        print 'here'
         if not exists:
             v = self.check_dln_exists('nodejs-{}'.format(name))
             if v is not None:
                 self.logger.warn("Note: nodejs-{} exists in obs".format(name))
                 self.logger.warn("current version: {}, obs version: {}".format(data['version'], v))
                 return
-        print __file__
 
         if not exists and dst != '.' and not os.path.exists(dst):
             if os.path.exists('.osc'):
@@ -155,6 +153,7 @@ class BoilderPlate(cmdln.Cmdln):
                 with open(specfn, 'w') as fh:
                     fh.write(str(spec))
                 self.write_changes_file(dst, pkg, data)
+                self.download(data['dist']['tarball'], dst)
         else:
             context = self.get_templatedata(data)
             with open(specfn, 'w') as fh:
@@ -164,6 +163,7 @@ class BoilderPlate(cmdln.Cmdln):
                 fh.write(self.genservice(context))
 
             self.write_changes_file(dst, pkg, data)
+            self.download(data['dist']['tarball'], dst)
 
     def write_changes_file(self, dst, pkg, data):
         lines = []
@@ -201,6 +201,18 @@ class BoilderPlate(cmdln.Cmdln):
             return ''
 
         return None
+
+    def download(self, url, dst):
+
+        fn = os.path.join(dst, os.path.basename(url))
+        if os.path.exists(fn):
+            return
+
+        r = requests.get(url, stream=True)
+        r.raise_for_status()
+        with open(fn, 'w') as fh:
+            for chunk in r.iter_content(4096):
+                fh.write(chunk)
 
     def fetch_registry(self, pkg):
         data = None
