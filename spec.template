@@ -1,0 +1,52 @@
+#
+# spec file for package {{ name }}
+#
+# Copyright (c) 2015 SUSE LINUX GmbH, Nuernberg, Germany.
+#
+# All modifications and additions to the file contributed by third parties
+# remain the property of their copyright owners, unless otherwise agreed
+# upon. The license for this file, and modifications and additions to the
+# file, is the same license as for the pristine package itself (unless the
+# license for the pristine package is not an Open Source License, in which
+# case the license is the MIT License). An "Open Source License" is a
+# license that conforms to the Open Source Definition (Version 1.9)
+# published by the Open Source Initiative.
+
+# Please submit bugfixes or comments via http://bugs.opensuse.org/
+#
+
+
+%define mod_name {{ name }}
+Name:           nodejs-{{ name }}
+Version:        {{ version }}
+Release:        0
+Summary:        {{ summary }}
+License:        MIT
+Group:          Development/Languages/Other
+Url:            {{ url }}
+Source:         http://registry.npmjs.org/%{mod_name}/-/%{mod_name}-%{version}.tgz
+BuildRequires:  nodejs-packaging
+BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+BuildArch:      noarch
+{% for i in requires %}Requires:       {{ i }}
+{% endfor %}
+%{nodejs_find_provides_and_requires}
+
+%description
+{{ description }}
+
+%prep
+%setup -q -n package
+
+%build
+
+%install
+mkdir -p %{buildroot}%{nodejs_sitelib}/%{mod_name}
+mv index.js package.json bin lib \
+	%{buildroot}%{nodejs_sitelib}/%{mod_name}
+
+%files
+%defattr(-, root, root)
+%{nodejs_sitelib}/%{mod_name}
+
+%changelog
