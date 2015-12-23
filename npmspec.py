@@ -143,7 +143,7 @@ class BoilderPlate(cmdln.Cmdln):
             oldver = spec.gettag('Version')
             if oldver is None:
                 raise Exception("old version not defined?")
-            if oldver == data['version']:
+            if oldver == data['version'] and not opts.force:
                 self.logger.info("same version exists")
                 return
             if 'dependencies' in data:
